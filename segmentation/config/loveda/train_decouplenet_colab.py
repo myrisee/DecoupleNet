@@ -178,6 +178,5 @@ val_loader = DataLoader(
 # ===================== OPTIMIZER =====================
 layerwise_params = {"backbone.*": dict(lr=backbone_lr, weight_decay=backbone_weight_decay)}
 net_params = process_model_params(net, layerwise_params=layerwise_params)
-base_optimizer = torch.optim.AdamW(net_params, lr=lr, weight_decay=weight_decay)
-optimizer = Lookahead(base_optimizer)
+optimizer = torch.optim.AdamW(net_params, lr=lr, weight_decay=weight_decay)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epoch, eta_min=1e-6)
