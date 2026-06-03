@@ -205,7 +205,7 @@ def download_and_organize(data_root):
 
 def main():
     parser = argparse.ArgumentParser(description="LoveDA veri setini HuggingFace'den indir ve hazirla")
-    parser.add_argument("--data-root", default="/content/data/LoveDA",
+    parser.add_argument("--data-root", default="/content/drive/MyDrive/DecoupleNet/data/LoveDA",
                         help="Veri setinin kaydedilecegi dizin (varsayilan: /content/data/LoveDA)")
     args = parser.parse_args()
 

@@ -87,7 +87,7 @@ classes = CLASSES
 
 # Agirlik ve log ayarlari
 weights_name = "decouplenet-loveda-colab-epoch30"
-weights_path = "/content/DecoupleNet/segmentation/model_weights/loveda"
+weights_path = "/content/drive/MyDrive/DecoupleNet/model_weights/loveda"
 test_weights_name = "last"
 log_name = 'loveda/decouplenet-colab'
 monitor = 'val_mIoU'
@@ -146,13 +146,13 @@ def val_aug(img, mask):
 # ===================== VERI SETLERI =====================
 train_dataset = LoveDAFlatTrainDataset(
     transform=train_aug,
-    data_root='/content/data/LoveDA/Train',
+    data_root='/content/drive/MyDrive/DecoupleNet/data/LoveDA/Train',
     mosaic_ratio=0.25
 )
 
 val_dataset = LoveDAFlatTrainDataset(
     transform=val_aug,
-    data_root='/content/data/LoveDA/Val',
+    data_root='/content/drive/MyDrive/DecoupleNet/data/LoveDA/Val',
     mosaic_ratio=0.0
 )
 

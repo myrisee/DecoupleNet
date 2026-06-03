@@ -77,7 +77,7 @@ class LoveDAFlatTrainDataset(Dataset):
         {data_root}/masks_png_convert/{img_id}.png
     """
 
-    def __init__(self, data_root='/content/data/LoveDA/Train',
+    def __init__(self, data_root='/content/drive/MyDrive/DecoupleNet/data/LoveDA/Train',
                  img_dir='images_png', mask_dir='masks_png_convert',
                  img_suffix='.png', mask_suffix='.png',
                  mosaic_ratio=0.25, transform=train_aug,
@@ -193,7 +193,7 @@ class LoveDAFlatTrainDataset(Dataset):
 
 # Pre-built val dataset instance for convenience
 loveda_val_dataset = LoveDAFlatTrainDataset(
-    data_root='/content/data/LoveDA/Val',
+    data_root='/content/drive/MyDrive/DecoupleNet/data/LoveDA/Val',
     mosaic_ratio=0.0,
     transform=val_aug
 )
@@ -202,7 +202,7 @@ loveda_val_dataset = LoveDAFlatTrainDataset(
 class LoveDAFlatTestDataset(Dataset):
     """Flat directory structure LoveDA dataset for testing (no masks)."""
 
-    def __init__(self, data_root='/content/data/LoveDA/Test',
+    def __init__(self, data_root='/content/drive/MyDrive/DecoupleNet/data/LoveDA/Test',
                  img_dir='images_png', img_suffix='.png',
                  mosaic_ratio=0.0, img_size=ORIGIN_IMG_SIZE):
         self.data_root = data_root
