@@ -9,12 +9,69 @@ from torch.utils.data import DataLoader
 from geoseg.losses import UnetFormerLoss
 from geoseg.datasets.loveda_dataset_colab import LoveDAFlatTrainDataset, CLASSES
 from geoseg.models.UNetFormer_decouplenet import UNetFormer_DecoupleNet_D2
-from catalyst.contrib.nn import Lookahead
-from catalyst import utils
 import torch
 import numpy as np
 import albumentations as albu
 from geoseg.datasets.transform import Compose, RandomScale, SmartCropV1
+
+
+# ===================== LOOKAHEAD (catalyst yerine inline) =====================
+class Lookahead(torch.optim.Optimizer):
+    """Lookahead optimizer wrapper - catalyst dependency removed for Python 3.12+."""
+    def __init__(self, optimizer, k=5, alpha=0.5):
+        self.optimizer = optimizer
+        self.k = k
+        self.alpha = alpha
+        self.param_groups = optimizer.param_groups
+        self.state = optimizer.state
+        self.fast_step = 0
+        self._copy_params()
+
+    def _copy_params(self):
+        self.slow_weights = [[p.clone().detach() for p in group['params']] for group in self.param_groups]
+
+    def step(self, closure=None):
+        result = self.optimizer.step(closure)
+        self.fast_step += 1
+        if self.fast_step >= self.k:
+            self.fast_step = 0
+            for group, slow_ws in zip(self.param_groups, self.slow_weights):
+                for fast, slow in zip(group['params'], slow_ws):
+                    if fast.grad is not None:
+                        slow.add_(fast.data - slow, alpha=self.alpha)
+                        fast.data.copy_(slow)
+        return result
+
+    def zero_grad(self):
+        self.optimizer.zero_grad()
+
+    def state_dict(self):
+        return {'fast_state': self.optimizer.state_dict(), 'slow_weights': self.slow_weights, 'fast_step': self.fast_step}
+
+    def load_state_dict(self, state_dict):
+        self.optimizer.load_state_dict(state_dict['fast_state'])
+        self.slow_weights = state_dict['slow_weights']
+        self.fast_step = state_dict['fast_step']
+
+
+def process_model_params(model, layerwise_params=None):
+    """Group model parameters with optional per-layer lr/weight_decay."""
+    if layerwise_params is None:
+        return [dict(params=list(model.parameters()))]
+    param_groups = []
+    matched = set()
+    for pattern, params_config in layerwise_params.items():
+        pattern_params = []
+        for name, param in model.named_parameters():
+            if pattern.replace('*', '') in name:
+                pattern_params.append(param)
+                matched.add(name)
+        if pattern_params:
+            param_groups.append(dict(params=pattern_params, **params_config))
+    remaining = [param for name, param in model.named_parameters() if name not in matched]
+    if remaining:
+        param_groups.append(dict(params=remaining))
+    return param_groups
 
 # ===================== COLAB PARAMETRELERI =====================
 max_epoch = 30
@@ -120,7 +177,7 @@ val_loader = DataLoader(
 
 # ===================== OPTIMIZER =====================
 layerwise_params = {"backbone.*": dict(lr=backbone_lr, weight_decay=backbone_weight_decay)}
-net_params = utils.process_model_params(net, layerwise_params=layerwise_params)
+net_params = process_model_params(net, layerwise_params=layerwise_params)
 base_optimizer = torch.optim.AdamW(net_params, lr=lr, weight_decay=weight_decay)
 optimizer = Lookahead(base_optimizer)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epoch, eta_min=1e-6)
