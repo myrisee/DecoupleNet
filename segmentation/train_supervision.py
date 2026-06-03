@@ -146,9 +146,9 @@ def main():
     if config.pretrained_ckpt_path:
         model = Supervision_Train.load_from_checkpoint(config.pretrained_ckpt_path, config=config)
 
-    trainer = pl.Trainer(devices=config.gpus, max_epochs=config.max_epoch, accelerator='auto',
+    trainer = pl.Trainer(devices=config.gpus, max_epochs=config.max_epoch, accelerator='gpu',
                          check_val_every_n_epoch=config.check_val_every_n_epoch,
-                         callbacks=[checkpoint_callback], strategy='auto',
+                         callbacks=[checkpoint_callback],
                          logger=logger)
     trainer.fit(model=model, ckpt_path=config.resume_ckpt_path)
 
