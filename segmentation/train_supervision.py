@@ -118,7 +118,10 @@ class Supervision_Train(pl.LightningModule):
         optimizer = self.config.optimizer
         lr_scheduler = self.config.lr_scheduler
 
-        return [optimizer], [lr_scheduler]
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": lr_scheduler
+        }
 
     def train_dataloader(self):
 
