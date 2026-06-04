@@ -7,7 +7,7 @@ Kullanim: python train_supervision.py -c config/loveda/train_decouplenet_colab.p
 
 from torch.utils.data import DataLoader
 from geoseg.losses import UnetFormerLoss
-from geoseg.datasets.loveda_dataset_colab import LoveDAFlatTrainDataset, CLASSES
+from geoseg.datasets.loveda_dataset_colab import LoveDAFlatTrainDataset, LoveDAFlatTestDataset, CLASSES
 from geoseg.models.UNetFormer_decouplenet import UNetFormer_DecoupleNet_D2
 import torch
 import numpy as np
@@ -99,6 +99,9 @@ pretrained_ckpt_path = None
 resume_ckpt_path = None
 gpus = 1                           # Colab tek GPU
 
+# ===================== TEST AYARLARI =====================
+test_weights_name = "decouplenet-loveda-colab-epoch30"  # .ckpt uzantisi olmadan
+
 # ===================== MODEL =====================
 net = UNetFormer_DecoupleNet_D2(num_classes=num_classes)
 
@@ -180,3 +183,8 @@ layerwise_params = {"backbone.*": dict(lr=backbone_lr, weight_decay=backbone_wei
 net_params = process_model_params(net, layerwise_params=layerwise_params)
 optimizer = torch.optim.AdamW(net_params, lr=lr, weight_decay=weight_decay)
 lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=max_epoch, eta_min=1e-6)
+
+# ===================== TEST DATASET =====================
+test_dataset = LoveDAFlatTestDataset(
+    data_root='/content/drive/MyDrive/DecoupleNet/data/LoveDA/Test'
+)
