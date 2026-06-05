@@ -495,8 +495,9 @@ def DecoupleNet_D2_1662_e64_k9_drop01(num_classes: int = 1000, **kwargs):
                         drop_path_rate=0.1,
                         fork_feat=True,
                         **kwargs)
+    _device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     checkpoint = torch.load('../backbone_weights/DecoupleNet_D2.pth',
-                            map_location=torch.device('cuda:0'), weights_only=False)
+                            map_location=_device, weights_only=False)
     _state_dict = checkpoint['model']
     state_dict = _state_dict
     missing_keys, unexpected_keys = model.load_state_dict(state_dict, False)
